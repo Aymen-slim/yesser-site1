@@ -13,7 +13,8 @@ photoStyle.textContent = [
   "img.big{max-height:100vh!important}",
   "img.image-48{max-height:100svh!important}",
   "img.image-11{width:100%!important;height:auto!important;max-height:none!important}",
-  "img.image-36{width:8.5rem!important;max-width:24vw!important;height:auto!important;max-height:16rem!important;object-fit:contain!important;aspect-ratio:auto!important}"
+  "img.image-36{width:8.5rem!important;max-width:24vw!important;height:auto!important;max-height:16rem!important;object-fit:contain!important;aspect-ratio:auto!important}",
+  "a.footer-link.is-copyright:hover{text-decoration:underline!important}"
 ].join("");
 document.head.appendChild(photoStyle);
 
