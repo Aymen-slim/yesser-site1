@@ -360,10 +360,58 @@ document.addEventListener(
     });
   }
 
+  function applySound(video) {
+    var on = video.getAttribute("data-sound") === "on";
+    video.muted = !on;
+    video.defaultMuted = !on;
+    video.volume = on ? 1 : 0;
+    if (on) video.removeAttribute("muted");
+    else video.setAttribute("muted", "");
+  }
+
   function play(video) {
     var pending = video.play();
     if (pending && typeof pending.catch === "function") pending.catch(function () {});
   }
+
+  var soundOff = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 9.5h3.2L11 6.2v11.6l-3.8-3.3H4v-5zm12.1.4 1.4 1.4 1.4-1.4 1.1 1.1-1.4 1.4 1.4 1.4-1.1 1.1-1.4-1.4-1.4 1.4-1.1-1.1 1.4-1.4-1.4-1.4z"/></svg>';
+  var soundOn = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 9.5h3.2L11 6.2v11.6l-3.8-3.3H4v-5z"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M15.2 9.2a3.6 3.6 0 0 1 0 5.6M17.6 7a6.4 6.4 0 0 1 0 10"/></svg>';
+  var soundStyle = document.createElement("style");
+  soundStyle.textContent = [
+    ".yb-sound{position:absolute;right:.75rem;bottom:.75rem;z-index:6;width:2.15rem;height:2.15rem;padding:0;border:0;border-radius:999px;display:flex;align-items:center;justify-content:center;background:rgba(10,9,10,.48);color:#fff;cursor:pointer}",
+    ".yb-sound:hover{background:rgba(10,9,10,.7)}",
+    ".yb-sound svg{width:1.05rem;height:1.05rem;display:block}"
+  ].join("");
+  document.head.appendChild(soundStyle);
+
+  function paintSound(button, on) {
+    button.innerHTML = on ? soundOn : soundOff;
+    button.setAttribute("aria-pressed", on ? "true" : "false");
+    button.setAttribute("aria-label", on ? "Mute" : "Unmute");
+  }
+
+  videos.forEach(function (video) {
+    var frame = frameOf(video);
+    if (frame === video) frame = video.parentElement || video;
+    applySound(video);
+    if (frame.querySelector(".yb-sound")) return;
+    if (getComputedStyle(frame).position === "static") frame.style.position = "relative";
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "yb-sound";
+    paintSound(button, false);
+    button.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      var on = video.getAttribute("data-sound") !== "on";
+      if (on) video.setAttribute("data-sound", "on");
+      else video.removeAttribute("data-sound");
+      applySound(video);
+      paintSound(button, on);
+      if (on) play(video);
+    });
+    frame.appendChild(button);
+  });
 
   function release(video) {
     if (video.getAttribute("data-releasing")) return;
@@ -390,9 +438,7 @@ document.addEventListener(
 
     var source = video.querySelector("source[src]");
     var existing = (source && source.getAttribute("src")) || video.getAttribute("src") || "";
-    video.muted = true;
-    video.defaultMuted = true;
-    video.setAttribute("muted", "");
+    applySound(video);
     video.playsInline = true;
     video.setAttribute("playsinline", "");
     video.loop = true;
@@ -429,6 +475,10 @@ document.addEventListener(
 
   function sync() {
     videos.forEach(function (video) {
+      var frame = frameOf(video);
+      if (frame === video) frame = video.parentElement;
+      var button = frame && frame.querySelector(".yb-sound");
+      if (button) button.hidden = hiddenDuplicate(video);
       if (hiddenDuplicate(video)) release(video);
     });
 
