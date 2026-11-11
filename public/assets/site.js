@@ -394,6 +394,7 @@ document.addEventListener(
     var frame = frameOf(video);
     if (frame === video) frame = video.parentElement || video;
     applySound(video);
+    if ((video.getAttribute("data-src") || "").indexOf("/assets/home/c5637.mp4") !== -1) return;
     if (frame.querySelector(".yb-sound")) return;
     if (getComputedStyle(frame).position === "static") frame.style.position = "relative";
     var button = document.createElement("button");
