@@ -15,9 +15,55 @@ photoStyle.textContent = [
   "img.image-11{width:100%!important;height:auto!important;max-height:none!important}",
   "img.image-36{width:8.5rem!important;max-width:24vw!important;height:auto!important;max-height:16rem!important;object-fit:contain!important;aspect-ratio:auto!important}",
   "a.footer-link.is-copyright:hover{text-decoration:underline!important}",
-  "@media (max-width:767px){label[for='Client-E-mail-2']{flex-basis:100%;width:100%;text-align:center}}"
+  ".yb-phrase{display:inline-flex;flex-wrap:nowrap;align-items:center;justify-content:center;column-gap:.5rem;max-width:100%}",
+  "@media (max-width:767px){",
+  ".form{width:100%!important}",
+  ".form-fields-labels-wrapper{width:100%}",
+  ".yb-phrase{flex-basis:100%;flex-direction:column;align-items:center;row-gap:.35rem}",
+  ".yb-phrase .form-input-field{width:min(18rem,100%)!important;max-width:100%}",
+  ".yb-phrase label[for='Client-E-mail-2']{flex-basis:auto;width:auto}",
+  ".form-field-label{white-space:normal;max-width:100%}",
+  "}"
 ].join("");
 document.head.appendChild(photoStyle);
+
+function keepInquiryPhrases() {
+  document.querySelectorAll("form.form .form-fields-labels-wrapper").forEach(function (fields) {
+    if (fields.querySelector(".yb-phrase")) return;
+    var nodes = Array.prototype.filter.call(fields.childNodes, function (node) {
+      return node.nodeType === 1;
+    });
+    var index = 0;
+    while (index < nodes.length) {
+      var node = nodes[index];
+      if (!node || node.tagName !== "LABEL") {
+        index += 1;
+        continue;
+      }
+      var phrase = document.createElement("span");
+      phrase.className = "yb-phrase";
+      fields.insertBefore(phrase, node);
+      phrase.appendChild(node);
+      var input = nodes[index + 1];
+      if (input && input.tagName === "INPUT") {
+        phrase.appendChild(input);
+        index += 2;
+        var people = nodes[index];
+        if (people && people.tagName === "LABEL" && people.getAttribute("for") === "Client-E-mail-2") {
+          phrase.appendChild(people);
+          index += 1;
+        }
+      } else {
+        index += 1;
+      }
+    }
+  });
+}
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", keepInquiryPhrases);
+} else {
+  keepInquiryPhrases();
+}
 
 (function () {
   var hero = document.querySelector(".home-hero_slide.is-header");
